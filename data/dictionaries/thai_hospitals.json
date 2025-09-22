@@ -1,0 +1,36 @@
+{
+  "thai_hospitals": [
+    "โรงพยาบาลศิริราช",
+    "โรงพยาบาลจุฬาลงกรณ์",
+    "โรงพยาบาลราชวิถี", 
+    "โรงพยาบาลเวชศาสตร์เขตร้อน",
+    "โรงพยาบาลกรุงเทพ",
+    "โรงพยาบาลบำรุงราษฎร์",
+    "โรงพยาบาลสมิติเวช",
+    "โรงพยาบาลพญาไท",
+    "โรงพยาบาลวิภาวดี",
+    "โรงพยาบาลเซนต์หลุยส์",
+    "โรงพยาบาลเซนต์คาร์ลอส",
+    "โรงพยาบาลเกษมราษฎร์",
+    "โรงพยาบาลลาดพร้าว",
+    "โรงพยาบาลพระรามเก้า",
+    "โรงพยาบาลสุขุมวิท",
+    "โรงพยาบาลทันตกรรม",
+    "โรงพยาบาลนพรัตนราชธานี",
+    "โรงพยาบาลมหาราชนครเชียงใหม่",
+    "โรงพยาบาลสงขลานครินทร์",
+    "โรงพยาบาลขอนแก่น"
+  ],
+  "international_hospitals": [
+    "Bangkok International Hospital",
+    "Bumrungrad International Hospital", 
+    "Samitivej Hospital",
+    "Bangkok Hospital",
+    "Phyathai Hospital",
+    "Vejthani Hospital",
+    "BNH Hospital",
+    "St. Louis Hospital",
+    "Paolo Memorial Hospital",
+    "Bangkok Christian Hospital"
+  ]
+}

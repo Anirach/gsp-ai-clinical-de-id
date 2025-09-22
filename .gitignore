@@ -1,0 +1,112 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+*.db
+*.sqlite3
+
+# Keys and certificates
+*.key
+*.pem
+*.crt
+*.p12
+secrets/
+
+# Model files (too large for git)
+models/
+*.pkl
+*.pt
+*.model
+
+# Test coverage
+htmlcov/
+.coverage
+.pytest_cache/
+coverage/
+
+# Node.js (Frontend)
+node_modules/
+frontend/node_modules/
+frontend/build/
+frontend/.eslintcache
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Data files (sensitive)
+data/real/
+data/production/
+data/exports/
+*.csv
+*.xlsx
+*.json
+!data/samples/example.json
+!data/dictionaries/*.json
+
+# Audit logs (too sensitive)
+audit/
+logs/audit/
+*.audit
+
+# Docker
+.dockerignore
+Dockerfile.dev

@@ -1,0 +1,33 @@
+Patient Name: John Smith
+Medical Record Number: MRN-2024-567890
+Date of Birth: January 15, 1978
+Phone: (555) 123-4567
+Email: john.smith@email.com
+Address: 123 Main Street, Apt 4B, New York, NY 10001
+
+Hospital: Bangkok International Hospital
+Physician: Dr. Sarah Johnson, MD
+Date of Service: March 10, 2024
+
+Chief Complaint:
+Patient presents with chest pain and shortness of breath.
+
+Physical Examination:
+- Blood Pressure: 150/95 mmHg
+- Heart Rate: 88 bpm
+- Temperature: 98.6°F
+- Weight: 180 lbs
+- Height: 5'10"
+
+Laboratory Results:
+- Cholesterol: 240 mg/dl
+- Glucose: 95 mg/dl
+- Hemoglobin: 14.2 g/dl
+
+Assessment and Plan:
+45-year-old male with hypertension and elevated cholesterol.
+Recommend dietary changes and follow-up in 3 months.
+
+Social Security: 123-45-6789
+Insurance ID: BC12345678
+License Plate: ABC123NY
