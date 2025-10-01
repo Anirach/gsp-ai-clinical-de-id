@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Output Display</title>
+</head>
+<body>
+    <h1>Debug Test</h1>
+    
+    <h3>Test Textarea</h3>
+    <textarea id="testOutput" rows="10" cols="80" placeholder="Results will appear here..."></textarea>
+    
+    <br><br>
+    <button onclick="testBasicOutput()">Test Basic Output</button>
+    <button onclick="testMockDeidentification()">Test Mock De-identification</button>
+    
+    <script>
+        function testBasicOutput() {
+            console.log('Testing basic output...');
+            const textarea = document.getElementById('testOutput');
+            console.log('Textarea element:', textarea);
+            textarea.value = 'Basic test successful! This text appears in the textarea.';
+            console.log('Value set to:', textarea.value);
+        }
+        
+        function testMockDeidentification() {
+            console.log('Testing mock de-identification...');
+            const textarea = document.getElementById('testOutput');
+            
+            // Mock API response structure
+            const mockData = {
+                "job_id": "test_job_123",
+                "status": "completed", 
+                "documents_processed": 1,
+                "results": [{
+                    "document_id": "test_doc",
+                    "original_length": 50,
+                    "deidentified_text": "[PERSON_ABC123] called [PHONE_DEF456] about test results",
+                    "entities_detected": 2,
+                    "transformations_applied": 2
+                }]
+            };
+            
+            console.log('Mock data:', mockData);
+            
+            const result = mockData.results[0];
+            const outputContent = `De-identification Results:\n\n` +
+                `Job ID: ${mockData.job_id}\n` +
+                `Status: ${mockData.status}\n` +
+                `Original Length: ${result.original_length} characters\n` +
+                `Entities Detected: ${result.entities_detected}\n` +
+                `Transformations Applied: ${result.transformations_applied}\n\n` +
+                `ORIGINAL TEXT:\nJohn Smith called 555-123-4567 about test results\n\n` +
+                `DE-IDENTIFIED TEXT:\n${result.deidentified_text}`;
+            
+            console.log('Setting content:', outputContent);
+            textarea.value = outputContent;
+            console.log('Final textarea value:', textarea.value);
+        }
+        
+        console.log('Test page loaded successfully');
+    </script>
+</body>
+</html>

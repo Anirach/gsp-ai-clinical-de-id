@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De-identification Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        textarea { width: 100%; height: 200px; margin: 10px 0; }
+        button { margin: 5px; padding: 10px 20px; }
+        .log { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>De-identification Display Debug</h1>
+    
+    <h3>Input</h3>
+    <textarea id="inputText">คุณสมชาย วิทยาภูมิ โทรศัพท์ 089-123-4567 อีเมล somchai@hospital.co.th หมอสมชาย ให้ยา</textarea>
+    
+    <h3>Output</h3>
+    <textarea id="outputText" readonly placeholder="Results will appear here..."></textarea>
+    
+    <div>
+        <button onclick="testBasicDisplay()">Test Basic Display</button>
+        <button onclick="testDeidentificationAPI()">Test De-identification API</button>
+        <button onclick="clearOutput()">Clear Output</button>
+    </div>
+    
+    <h3>Debug Log</h3>
+    <div id="debugLog" class="log"></div>
+    
+    <script>
+        const API_BASE_URL = 'https://8000-igoy3cr883cnchk200st0-6532622b.e2b.dev';
+        
+        function log(message) {
+            console.log(message);
+            const logDiv = document.getElementById('debugLog');
+            logDiv.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function testBasicDisplay() {
+            log('Testing basic display functionality...');
+            const outputText = document.getElementById('outputText');
+            log('Output element found: ' + (outputText !== null));
+            
+            if (outputText) {
+                const testContent = 'Basic test successful!\n\nThis is a multi-line test\nto verify textarea display\nis working properly.';
+                outputText.value = testContent;
+                log('Set test content, current value length: ' + outputText.value.length);
+                log('Test content preview: ' + outputText.value.substring(0, 50) + '...');
+            } else {
+                log('ERROR: Output textarea not found!');
+            }
+        }
+        
+        async function testDeidentificationAPI() {
+            log('Starting de-identification API test...');
+            
+            const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
+            const text = inputText.value.trim();
+            
+            log('Input text: ' + text);
+            
+            if (!text) {
+                log('ERROR: No input text provided');
+                return;
+            }
+            
+            try {
+                log('Making API request to: ' + API_BASE_URL + '/api/v1/jobs');
+                
+                const response = await fetch(`${API_BASE_URL}/api/v1/jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTcyNzc5ODQ4NH0.fake_token_for_demo`
+                    },
+                    body: JSON.stringify({
+                        documents: [
+                            {
+                                content: text,
+                                document_id: `debug_test_${Date.now()}`,
+                                metadata: { source: 'debug_test', timestamp: new Date().toISOString() }
+                            }
+                        ],
+                        policy_version: 'pdpa_v1.0',
+                        linkage_domain: 'patient_id'
+                    })
+                });
+                
+                log('Response status: ' + response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('API response received: ' + JSON.stringify(data, null, 2));
+                    
+                    // Display the results
+                    displayResults(data);
+                } else {
+                    const error = await response.text();
+                    log('API error: ' + error);
+                }
+            } catch (error) {
+                log('Network error: ' + error.message);
+            }
+        }
+        
+        function displayResults(data) {
+            log('Displaying de-identification results...');
+            
+            const outputText = document.getElementById('outputText');
+            const inputText = document.getElementById('inputText');
+            
+            if (!outputText) {
+                log('ERROR: Output textarea not found');
+                return;
+            }
+            
+            if (!data || !data.results || data.results.length === 0) {
+                log('ERROR: Invalid API response structure');
+                log('Data received: ' + JSON.stringify(data));
+                return;
+            }
+            
+            const result = data.results[0];
+            log('Processing result: ' + JSON.stringify(result));
+            
+            const outputContent = `De-identification Results:\n\n` +
+                `Job ID: ${data.job_id || 'N/A'}\n` +
+                `Status: ${data.status || 'N/A'}\n` +
+                `Original Length: ${result.original_length || 'N/A'} characters\n` +
+                `Entities Detected: ${result.entities_detected || 0}\n` +
+                `Transformations Applied: ${result.transformations_applied || 0}\n\n` +
+                `ORIGINAL TEXT:\n${inputText.value}\n\n` +
+                `DE-IDENTIFIED TEXT:\n${result.deidentified_text || 'No text available'}`;
+            
+            log('Setting output content (length: ' + outputContent.length + ')');
+            outputText.value = outputContent;
+            log('Output set successfully. Current textarea value length: ' + outputText.value.length);
+            
+            if (outputText.value.length === 0) {
+                log('WARNING: Textarea value is empty after setting!');
+            } else {
+                log('SUCCESS: Output displayed successfully');
+                log('First 100 chars: ' + outputText.value.substring(0, 100));
+            }
+        }
+        
+        function clearOutput() {
+            document.getElementById('outputText').value = '';
+            document.getElementById('debugLog').innerHTML = '';
+            log('Output cleared');
+        }
+        
+        log('Debug test page loaded successfully');
+    </script>
+</body>
+</html>

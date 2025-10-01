@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De-ID Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        textarea { width: 100%; height: 200px; margin: 10px 0; }
+        button { padding: 10px 20px; margin: 5px; }
+        .result { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>De-Identification Test</h1>
+        
+        <h3>Input Text:</h3>
+        <textarea id="inputText" placeholder="Enter text to test...">คุณสมชาย วิทยาภูมิ โทรศัพท์ 089-123-4567 อีเมล somchai@hospital.co.th วันเกิด 15 มกราคม 2540 มีอาการปวดหัว หมอสมชาย ให้ยา Paracetamol กับ ยาหม่อง ส่วนหมอ Peter ให้ยาถ่าย</textarea>
+        
+        <div>
+            <button onclick="testLogin()">1. Test Login</button>
+            <button onclick="testDetection()">2. Test Detection</button>
+            <button onclick="testDeidentification()">3. Test De-identification</button>
+        </div>
+        
+        <h3>Results:</h3>
+        <div id="results"></div>
+        
+        <h3>Console Output:</h3>
+        <textarea id="console" readonly></textarea>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://8000-igoy3cr883cnchk200st0-6532622b.e2b.dev';
+        let authToken = null;
+        
+        function log(message) {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            console.value += `[${timestamp}] ${message}\n`;
+            console.scrollTop = console.scrollHeight;
+            console.log(message);
+        }
+        
+        function showResult(content, type = 'result') {
+            const results = document.getElementById('results');
+            results.innerHTML = `<div class="${type}">${content}</div>`;
+        }
+        
+        async function testLogin() {
+            log('Testing login...');
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.access_token;
+                    log('✅ Login successful');
+                    showResult('Login successful! Token obtained.', 'success');
+                } else {
+                    log('❌ Login failed: ' + JSON.stringify(data));
+                    showResult('Login failed: ' + data.detail, 'error');
+                }
+            } catch (error) {
+                log('❌ Login error: ' + error.message);
+                showResult('Login error: ' + error.message, 'error');
+            }
+        }
+        
+        async function testDetection() {
+            if (!authToken) {
+                showResult('Please login first!', 'error');
+                return;
+            }
+            
+            const text = document.getElementById('inputText').value;
+            log('Testing entity detection...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/detect`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ text })
+                });
+                
+                const data = await response.json();
+                log('Detection response: ' + JSON.stringify(data, null, 2));
+                
+                if (response.ok) {
+                    showResult(`Detection successful! Found ${data.entities_found} entities.`, 'success');
+                } else {
+                    showResult('Detection failed: ' + data.detail, 'error');
+                }
+            } catch (error) {
+                log('❌ Detection error: ' + error.message);
+                showResult('Detection error: ' + error.message, 'error');
+            }
+        }
+        
+        async function testDeidentification() {
+            if (!authToken) {
+                showResult('Please login first!', 'error');
+                return;
+            }
+            
+            const text = document.getElementById('inputText').value;
+            log('Testing de-identification...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        documents: [{
+                            content: text,
+                            document_id: `test_${Date.now()}`
+                        }],
+                        policy_version: 'pdpa_v1.0',
+                        linkage_domain: 'patient_id'
+                    })
+                });
+                
+                const data = await response.json();
+                log('De-identification response: ' + JSON.stringify(data, null, 2));
+                
+                if (response.ok) {
+                    const result = data.results[0];
+                    const resultText = `
+                        <h4>De-identification Results:</h4>
+                        <p><strong>Job ID:</strong> ${data.job_id}</p>
+                        <p><strong>Status:</strong> ${data.status}</p>
+                        <p><strong>Entities Detected:</strong> ${result.entities_detected}</p>
+                        <p><strong>Transformations Applied:</strong> ${result.transformations_applied}</p>
+                        <h5>Original Text:</h5>
+                        <div style="background: #fff3cd; padding: 10px; border-radius: 3px;">${text}</div>
+                        <h5>De-identified Text:</h5>
+                        <div style="background: #d1ecf1; padding: 10px; border-radius: 3px;">${result.deidentified_text}</div>
+                    `;
+                    showResult(resultText, 'success');
+                } else {
+                    showResult('De-identification failed: ' + data.detail, 'error');
+                }
+            } catch (error) {
+                log('❌ De-identification error: ' + error.message);
+                showResult('De-identification error: ' + error.message, 'error');
+            }
+        }
+        
+        log('Test page loaded. Ready to test!');
+    </script>
+</body>
+</html>

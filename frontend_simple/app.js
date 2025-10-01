@@ -49,6 +49,19 @@ document.addEventListener('DOMContentLoaded', function() {
  * Initialize application
  */
 function initializeApp() {
+    console.log('=== Initializing App ===');
+    console.log('All elements found:', elements);
+    console.log('inputText element:', elements.inputText);
+    console.log('outputText element:', elements.outputText);
+    
+    // Verify critical elements exist
+    if (!elements.inputText) {
+        console.error('ERROR: inputText element not found!');
+    }
+    if (!elements.outputText) {
+        console.error('ERROR: outputText element not found!');
+    }
+    
     // Auto-fill password based on username selection
     elements.username.addEventListener('change', function() {
         const username = this.value;
@@ -317,9 +330,12 @@ async function deidentifyText() {
         const data = await response.json();
 
         if (response.ok) {
+            console.log('De-identification API response:', data);
+            console.log('Calling displayDeidentificationResults with data:', JSON.stringify(data, null, 2));
             displayDeidentificationResults(data);
             showAlert(`De-identification completed! ${data.results[0].transformations_applied} transformations applied.`, 'success');
         } else {
+            console.error('De-identification API error:', data);
             showAlert(data.detail || 'De-identification failed', 'danger');
         }
     } catch (error) {
@@ -353,31 +369,81 @@ function displayDetectionResults(data) {
  * Display de-identification results
  */
 function displayDeidentificationResults(data) {
-    const result = data.results[0];
+    console.log('=== displayDeidentificationResults called ===');
+    console.log('Input data:', JSON.stringify(data, null, 2));
     
-    elements.outputText.value = `De-identification Results:\n\n` +
-        `Job ID: ${data.job_id}\n` +
-        `Status: ${data.status}\n` +
-        `Original Length: ${result.original_length} characters\n` +
-        `Entities Detected: ${result.entities_detected}\n` +
-        `Transformations Applied: ${result.transformations_applied}\n\n` +
-        `ORIGINAL TEXT:\n${elements.inputText.value}\n\n` +
-        `DE-IDENTIFIED TEXT:\n${result.deidentified_text}`;
+    // Get the output textarea by ID directly as a backup
+    const outputTextarea = document.getElementById('outputText');
+    console.log('Direct getElementById outputText:', outputTextarea);
+    
+    if (!data || !data.results || data.results.length === 0) {
+        console.error('Invalid de-identification data:', data);
+        showAlert('Invalid response from de-identification API', 'danger');
+        return;
+    }
+    
+    const result = data.results[0];
+    console.log('First result:', JSON.stringify(result, null, 2));
+    
+    if (!result) {
+        console.error('No result found in response');
+        showAlert('No results found in API response', 'danger');
+        return;
+    }
+    
+    // Safely construct output content
+    const outputContent = `De-identification Results:\n\n` +
+        `Job ID: ${data.job_id || 'N/A'}\n` +
+        `Status: ${data.status || 'N/A'}\n` +
+        `Original Length: ${result.original_length || 'N/A'} characters\n` +
+        `Entities Detected: ${result.entities_detected || 0}\n` +
+        `Transformations Applied: ${result.transformations_applied || 0}\n\n` +
+        `ORIGINAL TEXT:\n${elements.inputText ? elements.inputText.value : 'N/A'}\n\n` +
+        `DE-IDENTIFIED TEXT:\n${result.deidentified_text || 'No text available'}`;
+    
+    console.log('Constructed output content (length: ' + outputContent.length + '):', outputContent.substring(0, 200) + '...');
+    
+    // Try multiple ways to set the output
+    if (elements.outputText) {
+        console.log('Setting via elements.outputText...');
+        elements.outputText.value = outputContent;
+        console.log('Set via elements.outputText - current value length:', elements.outputText.value.length);
+    } else {
+        console.error('elements.outputText is null/undefined');
+    }
+    
+    if (outputTextarea) {
+        console.log('Setting via direct getElementById...');
+        outputTextarea.value = outputContent;
+        console.log('Set via getElementById - current value length:', outputTextarea.value.length);
+    } else {
+        console.error('Direct getElementById also failed');
+    }
 
-    // Update statistics
-    elements.entitiesCount.textContent = result.entities_detected;
-    elements.detectedLanguage.textContent = 'PROTECTED';
+    // Update statistics with null checks
+    if (elements.entitiesCount) {
+        elements.entitiesCount.textContent = result.entities_detected || 0;
+    }
+    
+    if (elements.detectedLanguage) {
+        elements.detectedLanguage.textContent = 'PROTECTED';
+    }
 
-    // Show transformation info
-    elements.detectedEntities.innerHTML = `
-        <div class="alert alert-success mb-0">
-            <h6><i class="fas fa-shield-alt"></i> Privacy Protection Applied</h6>
-            <p class="mb-2">✅ <strong>${result.transformations_applied}</strong> sensitive entities have been masked or pseudonymized.</p>
-            <p class="mb-0"><small>All personal information has been protected while preserving clinical context.</small></p>
-        </div>
-    `;
+    // Show transformation info with null check
+    if (elements.detectedEntities) {
+        elements.detectedEntities.innerHTML = `
+            <div class="alert alert-success mb-0">
+                <h6><i class="fas fa-shield-alt"></i> Privacy Protection Applied</h6>
+                <p class="mb-2">✅ <strong>${result.transformations_applied || 0}</strong> sensitive entities have been masked or pseudonymized.</p>
+                <p class="mb-0"><small>All personal information has been protected while preserving clinical context.</small></p>
+            </div>
+        `;
+    }
 
-    elements.resultSection.style.display = 'block';
+    console.log('Showing result section');
+    if (elements.resultSection) {
+        elements.resultSection.style.display = 'block';
+    }
 }
 
 /**
@@ -471,5 +537,25 @@ function showAlert(message, type = 'info') {
     }, 5000);
 }
 
+// Test function for debugging
+function testOutputDisplay() {
+    console.log('=== Testing Output Display ===');
+    console.log('outputText element:', elements.outputText);
+    console.log('Current value:', elements.outputText ? elements.outputText.value : 'ELEMENT NOT FOUND');
+    
+    if (elements.outputText) {
+        elements.outputText.value = 'TEST: This is a test message to verify output display is working!';
+        console.log('Set test value, current value now:', elements.outputText.value);
+        
+        // Show result section
+        if (elements.resultSection) {
+            elements.resultSection.style.display = 'block';
+            console.log('Result section displayed');
+        }
+    }
+}
+
 // Expose functions globally for HTML onclick handlers
 window.loadSampleText = loadSampleText;
+window.testOutputDisplay = testOutputDisplay;
+window.elements = elements; // For debugging
