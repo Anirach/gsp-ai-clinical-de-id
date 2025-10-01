@@ -114,17 +114,21 @@ def simple_entity_detection(text: str):
     
     entities = []
     
-    # Thai phone numbers
-    thai_phone_pattern = r'0[689]\d{8}'
+    # Thai phone numbers (enhanced patterns)
+    # Pattern 1: 08x-xxx-xxxx or 08x xxx xxxx or 08xxxxxxxx
+    thai_phone_pattern = r'0[689][\d\-\s]{8,10}'
     for match in re.finditer(thai_phone_pattern, text):
-        entities.append({
-            "entity_type": "PHONE_NUMBER",
-            "start": match.start(),
-            "end": match.end(), 
-            "text": match.group(),
-            "confidence": 0.9,
-            "detector": "thai_rule"
-        })
+        # Clean the match to check if it's a valid phone number
+        clean_number = re.sub(r'[\-\s]', '', match.group())
+        if len(clean_number) == 10 and clean_number.startswith(('08', '09', '06')):
+            entities.append({
+                "entity_type": "PHONE_NUMBER",
+                "start": match.start(),
+                "end": match.end(), 
+                "text": match.group(),
+                "confidence": 0.95,
+                "detector": "thai_phone_rule"
+            })
     
     # Email addresses
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -138,16 +142,28 @@ def simple_entity_detection(text: str):
             "detector": "email_rule"
         })
     
-    # Thai names (simplified - look for Thai title + Thai text)
-    thai_name_pattern = r'(นาย|นาง|นางสาว|คุณ)\s*([ก-๙\s]{2,20})'
+    # Thai names (enhanced - includes medical titles and professional titles)
+    thai_name_pattern = r'(นาย|นาง|นางสาว|คุณ|หมอ|ดร\.|ดอกเตอร์|พยาบาล|ครู|อาจารย์)\s*([ก-๙\s]{2,20})'
     for match in re.finditer(thai_name_pattern, text):
         entities.append({
             "entity_type": "PERSON",
             "start": match.start(),
             "end": match.end(),
             "text": match.group(),
-            "confidence": 0.8,
+            "confidence": 0.85,
             "detector": "thai_name_rule"
+        })
+    
+    # Thai doctor names with English names (หมอ + English name)
+    thai_doctor_english_pattern = r'หมอ\s*[A-Z][a-zA-Z]+\b'
+    for match in re.finditer(thai_doctor_english_pattern, text):
+        entities.append({
+            "entity_type": "PERSON",
+            "start": match.start(),
+            "end": match.end(),
+            "text": match.group(),
+            "confidence": 0.9,
+            "detector": "thai_doctor_english_rule"
         })
     
     # English names (simplified - look for capitalized words)
