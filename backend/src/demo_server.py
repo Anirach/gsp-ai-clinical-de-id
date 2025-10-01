@@ -3,7 +3,7 @@ Simplified demo server for Clinical De-ID system.
 This version runs without heavy ML dependencies for demonstration purposes.
 """
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -224,7 +224,7 @@ async def health_check():
     return {
         "status": "healthy",
         "version": "0.1.0-demo",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "services": {
             "api": "healthy",
             "detection": "demo_mode", 
@@ -243,7 +243,7 @@ async def login(request: LoginRequest):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Simple token (in real system, use JWT)
-    token = f"demo_token_{request.username}_{datetime.utcnow().timestamp()}"
+    token = f"demo_token_{request.username}_{datetime.now(UTC).timestamp()}"
     active_tokens[token] = user
     
     return {
@@ -291,7 +291,7 @@ async def detect_entities(request: DetectionRequest):
 async def create_job(request: DeIdentificationRequest):
     """Create de-identification job (demo version)."""
     
-    job_id = f"demo_job_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+    job_id = f"demo_job_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
     
     # Process documents (simplified)
     results = []
