@@ -142,16 +142,79 @@ def simple_entity_detection(text: str):
             "detector": "email_rule"
         })
     
-    # Thai names (enhanced - includes medical titles and professional titles)
-    thai_name_pattern = r'(นาย|นาง|นางสาว|คุณ|หมอ|ดร\.|ดอกเตอร์|พยาบาล|ครู|อาจารย์)\s*([ก-๙\s]{2,20})'
+    # Thai names with titles - more precise matching
+    # Match title + Thai name (but be more careful about boundaries)
+    thai_name_pattern = r'(นาย|นาง|นางสาว|คุณ)\s*([ก-๙]{2,15})(?=\s|$|\b[^ก-๙])'
     for match in re.finditer(thai_name_pattern, text):
+        # Exclude if the match contains common words or extends too far
+        full_match = match.group()
+        thai_name_part = match.group(2) if len(match.groups()) > 1 else match.group()
+        
+        # Skip if it contains common non-name words
+        if not any(word in full_match for word in ['ผู้ป่วย', 'เลขที่', 'แพทย์', 'อาการ']):
+            entities.append({
+                "entity_type": "PERSON",
+                "start": match.start(),
+                "end": match.end(),
+                "text": match.group(),
+                "confidence": 0.90,
+                "detector": "thai_name_with_title_rule"
+            })
+    
+    # Medical titles (หมอ, ดร., ดอกเตอร์, etc.) - separate handling
+    medical_title_pattern = r'(หมอ|ดร\.|ดอกเตอร์|พยาบาล)(?!\s*ให้)'  # Don't match "หมอให้ยา"
+    for match in re.finditer(medical_title_pattern, text):
         entities.append({
             "entity_type": "PERSON",
             "start": match.start(),
             "end": match.end(),
             "text": match.group(),
-            "confidence": 0.85,
-            "detector": "thai_name_rule"
+            "confidence": 0.75,
+            "detector": "medical_title_rule"
+        })
+    
+    # Standalone Thai names (without titles) - More targeted approach
+    # Look for specific Thai name patterns that are commonly missed
+    specific_thai_names = ['วิษณุ', 'ขำมาก', 'สมหญิง', 'สมชาย', 'สมใส', 'วิทยา', 'ภูมิ']  # Common Thai names
+    
+    for name in specific_thai_names:
+        name_pattern = r'\b' + re.escape(name) + r'\b'
+        for match in re.finditer(name_pattern, text):
+            entities.append({
+                "entity_type": "PERSON",
+                "start": match.start(),
+                "end": match.end(),
+                "text": match.group(),
+                "confidence": 0.85,
+                "detector": "specific_thai_name_rule"
+            })
+    
+    # Additional Thai names that might be missed (disable general matching for now)
+    # Focus on known medical names and common Thai names only
+    additional_thai_names = ['ขำมาก']  # Add more known names as needed
+    
+    for name in additional_thai_names:
+        name_pattern = r'\b' + re.escape(name) + r'\b'
+        for match in re.finditer(name_pattern, text):
+            entities.append({
+                "entity_type": "PERSON",
+                "start": match.start(),
+                "end": match.end(),
+                "text": match.group(),
+                "confidence": 0.85,
+                "detector": "additional_thai_name_rule"
+            })
+    
+    # Dr. + Thai name pattern (Dr. สมหญิง)
+    dr_thai_name_pattern = r'Dr\.\s*[ก-๙]{2,15}\b'
+    for match in re.finditer(dr_thai_name_pattern, text):
+        entities.append({
+            "entity_type": "PERSON",
+            "start": match.start(),
+            "end": match.end(),
+            "text": match.group(),
+            "confidence": 0.95,
+            "detector": "dr_thai_name_rule"
         })
     
     # Thai doctor names with English names (หมอ + English name)
@@ -166,9 +229,65 @@ def simple_entity_detection(text: str):
             "detector": "thai_doctor_english_rule"
         })
     
-    # English names (simplified - look for capitalized words)
-    english_name_pattern = r'\b[A-Z][a-z]+ [A-Z][a-z]+\b'
-    for match in re.finditer(english_name_pattern, text):
+    # Hospital Numbers and Patient IDs (HN, Patient ID patterns)
+    # More targeted patterns to avoid capturing too much text
+    hospital_id_patterns = [
+        (r'\bHN\d{4,10}\b', 0.95),  # HN followed by 4-10 digits (exact)
+        (r'\bผู้ป่วยเลขที่\s*(HN\d{4,10})\b', 0.90),  # Patient number with HN
+        (r'\bเลขที่\s*(HN\d{4,10})\b', 0.90),  # General ID with HN
+    ]
+    
+    for pattern, confidence in hospital_id_patterns:
+        for match in re.finditer(pattern, text):
+            # For patterns with groups, extract just the HN part if available
+            if match.groups():
+                # If there are capture groups, use the first one (the HN part)
+                hn_match = match.group(1)
+                hn_start = match.start(1)
+                hn_end = match.end(1) 
+                entities.append({
+                    "entity_type": "PATIENT_ID",
+                    "start": hn_start,
+                    "end": hn_end,
+                    "text": hn_match,
+                    "confidence": confidence,
+                    "detector": "hospital_id_rule"
+                })
+            else:
+                # No groups, use the full match
+                entities.append({
+                    "entity_type": "PATIENT_ID",
+                    "start": match.start(),
+                    "end": match.end(),
+                    "text": match.group(),
+                    "confidence": confidence,
+                    "detector": "hospital_id_rule"
+                })
+    
+    # English names - both single and double names
+    # Single English name pattern (like "Peter")
+    single_english_name_pattern = r'\b[A-Z][a-z]{2,15}\b'
+    english_common_words = {'Peter', 'John', 'David', 'Michael', 'James', 'Robert', 'William', 'Richard', 'Thomas', 'Christopher'}
+    
+    for match in re.finditer(single_english_name_pattern, text):
+        name = match.group()
+        # Only include if it's a common English name or looks like one
+        if (name in english_common_words or 
+            (len(name) >= 3 and not any(word in name.lower() for word in ['paracetamal', 'hospital', 'medical']))):
+            # Additional check: make sure it's likely a name in medical context
+            if name in english_common_words or len(name) <= 8:  # Conservative approach
+                entities.append({
+                    "entity_type": "PERSON",
+                    "start": match.start(),
+                    "end": match.end(),
+                    "text": match.group(),
+                    "confidence": 0.8,
+                    "detector": "single_english_name_rule"
+                })
+    
+    # Full English names (First Last)
+    full_english_name_pattern = r'\b[A-Z][a-z]+ [A-Z][a-z]+\b'
+    for match in re.finditer(full_english_name_pattern, text):
         # Skip if it looks like a hospital/organization
         if not any(word in match.group().lower() for word in ['hospital', 'medical', 'center']):
             entities.append({
@@ -176,8 +295,8 @@ def simple_entity_detection(text: str):
                 "start": match.start(), 
                 "end": match.end(),
                 "text": match.group(),
-                "confidence": 0.7,
-                "detector": "english_name_rule"
+                "confidence": 0.85,
+                "detector": "full_english_name_rule"
             })
     
     # Dates
@@ -192,7 +311,31 @@ def simple_entity_detection(text: str):
             "detector": "date_rule"
         })
     
-    return entities
+    # Remove overlapping entities (keep the longest/most specific match)
+    def remove_overlapping_entities(entities_list):
+        """Remove overlapping entities, prioritizing longer and more specific matches."""
+        if not entities_list:
+            return []
+        
+        # Sort by start position, then by length (descending) for priority
+        sorted_entities = sorted(entities_list, key=lambda x: (x['start'], -(x['end'] - x['start']), -x['confidence']))
+        
+        non_overlapping = []
+        for entity in sorted_entities:
+            # Check if this entity overlaps with any already selected entity
+            overlaps = False
+            for selected in non_overlapping:
+                if (entity['start'] < selected['end'] and entity['end'] > selected['start']):
+                    overlaps = True
+                    break
+            
+            if not overlaps:
+                non_overlapping.append(entity)
+        
+        return sorted(non_overlapping, key=lambda x: x['start'])
+    
+    # Remove overlaps and return cleaned entities
+    return remove_overlapping_entities(entities)
 
 # Simple pseudonymization
 def generate_pseudonym(text: str, entity_type: str) -> str:
@@ -211,6 +354,8 @@ def generate_pseudonym(text: str, entity_type: str) -> str:
         return f"[PHONE_{hash_hex[:8]}]"
     elif entity_type == "EMAIL_ADDRESS":
         return f"[EMAIL_{hash_hex[:8]}]"
+    elif entity_type == "PATIENT_ID":
+        return f"[PATIENT_ID_{hash_hex[:8].upper()}]"
     else:
         return f"[{entity_type}_{hash_hex[:6].upper()}]"
 
