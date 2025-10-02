@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete End-to-End Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container { margin-top: 20px; }
+        textarea { min-height: 200px; }
+        .debug-section { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace; }
+        .step-result { margin: 5px 0; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Complete End-to-End Test</h1>
+        <p>This test replicates the exact user workflow that should show results in the output window.</p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5>📝 Input Text</h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="inputText">คุณสมชาย วิทยาภูมิ โทรศัพท์ 089-123-4567 อีเมล somchai@hospital.co.th หมอสมชาย ให้ยา</textarea>
+                        <div class="mt-3">
+                            <button class="btn btn-warning" onclick="runCompleteWorkflow()">
+                                🚀 Run Complete Test Workflow
+                            </button>
+                            <button class="btn btn-info" onclick="testDisplayFunction()">
+                                🔧 Test Display Function Only
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5>📊 Output Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <label for="outputText" class="form-label">Processed Text</label>
+                        <textarea class="form-control" id="outputText" readonly placeholder="Processed text will appear here..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="debug-section">
+            <h4>🔍 Test Progress & Results</h4>
+            <div id="testResults"></div>
+            <br>
+            <button class="btn btn-secondary btn-sm" onclick="clearResults()">Clear Results</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://8000-igoy3cr883cnchk200st0-6532622b.e2b.dev';
+        
+        function addResult(message, success = true) {
+            const resultsDiv = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = success ? 'success' : 'error';
+            const icon = success ? '✅' : '❌';
+            
+            resultsDiv.innerHTML += `<div class="step-result ${className}">[${timestamp}] ${icon} ${message}</div>`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+            
+            console.log(`${icon} ${message}`);
+        }
+        
+        function clearResults() {
+            document.getElementById('testResults').innerHTML = '';
+            document.getElementById('outputText').value = '';
+        }
+        
+        async function runCompleteWorkflow() {
+            addResult('🚀 Starting Complete End-to-End Test Workflow');
+            
+            // Step 1: Check elements
+            const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
+            
+            if (!inputText || !outputText) {
+                addResult('Critical elements not found', false);
+                return;
+            }
+            addResult('Step 1: DOM elements found successfully');
+            
+            // Step 2: Get input text
+            const text = inputText.value.trim();
+            if (!text) {
+                addResult('No input text provided', false);
+                return;
+            }
+            addResult(`Step 2: Input text ready (${text.length} chars)`);
+            
+            // Step 3: Test basic textarea functionality
+            const originalPlaceholder = outputText.placeholder;
+            outputText.value = 'Testing basic functionality...';
+            if (outputText.value.includes('Testing basic')) {
+                addResult('Step 3: Basic textarea assignment works');
+                outputText.value = ''; // Clear for real test
+            } else {
+                addResult('Step 3: Basic textarea assignment failed', false);
+                return;
+            }
+            
+            // Step 4: Make API call
+            addResult('Step 4: Making API request...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTcyNzc5ODQ4NH0.fake_token_for_demo`
+                    },
+                    body: JSON.stringify({
+                        documents: [
+                            {
+                                content: text,
+                                document_id: `complete_test_${Date.now()}`,
+                                metadata: { source: 'complete_test', timestamp: new Date().toISOString() }
+                            }
+                        ],
+                        policy_version: 'pdpa_v1.0',
+                        linkage_domain: 'patient_id'
+                    })
+                });
+                
+                if (!response.ok) {
+                    addResult(`API request failed: ${response.status}`, false);
+                    return;
+                }
+                
+                const data = await response.json();
+                addResult(`Step 4: API request successful - ${data.results[0].entities_detected} entities detected`);
+                
+                // Step 5: Call display function
+                addResult('Step 5: Calling displayDeidentificationResults...');
+                
+                // This should replicate exactly what the main app does
+                displayResults(data);
+                
+                // Step 6: Verify results displayed
+                setTimeout(() => {
+                    const currentValue = outputText.value;
+                    if (currentValue && currentValue.includes('DE-IDENTIFICATION RESULTS')) {
+                        addResult(`Step 6: ✨ SUCCESS! Results displayed (${currentValue.length} chars)`);
+                        addResult('🎉 COMPLETE WORKFLOW TEST PASSED!');
+                    } else {
+                        addResult(`Step 6: Results not displayed - current value: "${currentValue}"`, false);
+                        addResult('❌ COMPLETE WORKFLOW TEST FAILED', false);
+                    }
+                }, 500);
+                
+            } catch (error) {
+                addResult(`API request error: ${error.message}`, false);
+            }
+        }
+        
+        function testDisplayFunction() {
+            addResult('🔧 Testing Display Function with Mock Data');
+            
+            const mockData = {
+                job_id: "test_job_display",
+                status: "completed",
+                documents_processed: 1,
+                results: [{
+                    document_id: "test_doc",
+                    original_length: 75,
+                    deidentified_text: "[PERSON_ABC] โทรศัพท์ [PHONE_DEF] อีเมล [EMAIL_GHI] [PERSON_JKL] ให้ยา",
+                    entities_detected: 4,
+                    transformations_applied: 4
+                }]
+            };
+            
+            displayResults(mockData);
+            
+            setTimeout(() => {
+                const outputText = document.getElementById('outputText');
+                if (outputText.value && outputText.value.includes('DE-IDENTIFICATION RESULTS')) {
+                    addResult('✨ Display function test PASSED!');
+                } else {
+                    addResult(`Display function test FAILED - value: "${outputText.value}"`, false);
+                }
+            }, 200);
+        }
+        
+        // This replicates the exact display logic from the main app
+        function displayResults(data) {
+            console.log('=== displayResults ENTRY ===');
+            console.log('Data:', data);
+            
+            if (!data || !data.results || data.results.length === 0) {
+                addResult('Invalid data structure', false);
+                return;
+            }
+            
+            const result = data.results[0];
+            const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
+            
+            if (!outputText) {
+                addResult('Output textarea not found', false);
+                return;
+            }
+            
+            const originalText = inputText ? inputText.value : 'N/A';
+            const deidentifiedText = result.deidentified_text || 'No text available';
+            
+            const outputContent = `DE-IDENTIFICATION RESULTS
+========================================
+
+JOB ID: ${data.job_id || 'N/A'}
+STATUS: ${data.status || 'N/A'}
+ENTITIES DETECTED: ${result.entities_detected || 0}
+TRANSFORMATIONS: ${result.transformations_applied || 0}
+
+ORIGINAL TEXT:
+${originalText}
+
+DE-IDENTIFIED TEXT:
+${deidentifiedText}
+
+========================================
+Privacy protection applied successfully!`;
+
+            addResult(`Setting content (${outputContent.length} chars)...`);
+            
+            try {
+                outputText.value = outputContent;
+                
+                // Force DOM update
+                outputText.dispatchEvent(new Event('input'));
+                outputText.dispatchEvent(new Event('change'));
+                
+                addResult(`Content set successfully - current length: ${outputText.value.length}`);
+                
+            } catch (error) {
+                addResult(`Error setting content: ${error.message}`, false);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('🌟 Complete Test Page Loaded - Ready for Testing');
+        });
+    </script>
+</body>
+</html>

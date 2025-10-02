@@ -369,55 +369,91 @@ function displayDetectionResults(data) {
  * Display de-identification results
  */
 function displayDeidentificationResults(data) {
-    console.log('=== displayDeidentificationResults called ===');
-    console.log('Input data:', JSON.stringify(data, null, 2));
+    console.log('=== displayDeidentificationResults ENTRY ===');
+    console.log('Raw data:', data);
     
-    // Get the output textarea by ID directly as a backup
-    const outputTextarea = document.getElementById('outputText');
-    console.log('Direct getElementById outputText:', outputTextarea);
+    // STEP 1: Validate the data
+    if (!data) {
+        console.error('ERROR: No data received');
+        showAlert('No data received from API', 'danger');
+        return;
+    }
     
-    if (!data || !data.results || data.results.length === 0) {
-        console.error('Invalid de-identification data:', data);
-        showAlert('Invalid response from de-identification API', 'danger');
+    if (!data.results) {
+        console.error('ERROR: No results in data');
+        showAlert('No results in API response', 'danger');
+        return;
+    }
+    
+    if (data.results.length === 0) {
+        console.error('ERROR: Empty results array');
+        showAlert('Empty results from API', 'danger');
         return;
     }
     
     const result = data.results[0];
-    console.log('First result:', JSON.stringify(result, null, 2));
+    console.log('Using result:', result);
     
-    if (!result) {
-        console.error('No result found in response');
-        showAlert('No results found in API response', 'danger');
+    // STEP 2: Get ALL possible references to output textarea
+    const outputViaElements = elements.outputText;
+    const outputViaGetElementById = document.getElementById('outputText');
+    const outputViaQuerySelector = document.querySelector('#outputText');
+    
+    console.log('Output via elements.outputText:', outputViaElements);
+    console.log('Output via getElementById:', outputViaGetElementById);
+    console.log('Output via querySelector:', outputViaQuerySelector);
+    
+    // STEP 3: Choose the best available output element
+    let outputElement = outputViaElements || outputViaGetElementById || outputViaQuerySelector;
+    
+    if (!outputElement) {
+        console.error('CRITICAL ERROR: No output element found by any method');
+        showAlert('Output textarea not found', 'danger');
         return;
     }
     
-    // Safely construct output content
-    const outputContent = `De-identification Results:\n\n` +
-        `Job ID: ${data.job_id || 'N/A'}\n` +
-        `Status: ${data.status || 'N/A'}\n` +
-        `Original Length: ${result.original_length || 'N/A'} characters\n` +
-        `Entities Detected: ${result.entities_detected || 0}\n` +
-        `Transformations Applied: ${result.transformations_applied || 0}\n\n` +
-        `ORIGINAL TEXT:\n${elements.inputText ? elements.inputText.value : 'N/A'}\n\n` +
-        `DE-IDENTIFIED TEXT:\n${result.deidentified_text || 'No text available'}`;
+    console.log('Selected output element:', outputElement);
+    console.log('Current value before update:', outputElement.value);
     
-    console.log('Constructed output content (length: ' + outputContent.length + '):', outputContent.substring(0, 200) + '...');
+    // STEP 4: Construct the simple, clear output content
+    const originalText = elements.inputText ? elements.inputText.value : 'N/A';
+    const deidentifiedText = result.deidentified_text || 'No text available';
     
-    // Try multiple ways to set the output
-    if (elements.outputText) {
-        console.log('Setting via elements.outputText...');
-        elements.outputText.value = outputContent;
-        console.log('Set via elements.outputText - current value length:', elements.outputText.value.length);
-    } else {
-        console.error('elements.outputText is null/undefined');
-    }
+    const outputContent = `DE-IDENTIFICATION RESULTS
+========================================
+
+JOB ID: ${data.job_id || 'N/A'}
+STATUS: ${data.status || 'N/A'}
+ENTITIES DETECTED: ${result.entities_detected || 0}
+TRANSFORMATIONS: ${result.transformations_applied || 0}
+
+ORIGINAL TEXT:
+${originalText}
+
+DE-IDENTIFIED TEXT:
+${deidentifiedText}
+
+========================================
+Privacy protection applied successfully!`;
+
+    console.log('Content to set (length=' + outputContent.length + '):', outputContent.substring(0, 150) + '...');
     
-    if (outputTextarea) {
-        console.log('Setting via direct getElementById...');
-        outputTextarea.value = outputContent;
-        console.log('Set via getElementById - current value length:', outputTextarea.value.length);
-    } else {
-        console.error('Direct getElementById also failed');
+    // STEP 5: Set the value with multiple fallback attempts
+    try {
+        console.log('SETTING VALUE...');
+        outputElement.value = outputContent;
+        console.log('Value set. New length:', outputElement.value.length);
+        console.log('First 100 chars:', outputElement.value.substring(0, 100));
+        
+        // Force a DOM update
+        outputElement.dispatchEvent(new Event('input'));
+        outputElement.dispatchEvent(new Event('change'));
+        
+        console.log('SUCCESS: Output value updated');
+        
+    } catch (error) {
+        console.error('ERROR setting output value:', error);
+        showAlert('Failed to update output display', 'danger');
     }
 
     // Update statistics with null checks
@@ -553,6 +589,28 @@ function testOutputDisplay() {
             console.log('Result section displayed');
         }
     }
+}
+
+// Test function to simulate real de-identification
+function testRealDeidentification() {
+    console.log('=== Testing Real De-identification ===');
+    
+    // Mock a real API response structure
+    const mockResponse = {
+        job_id: "test_job_12345",
+        status: "completed", 
+        documents_processed: 1,
+        results: [{
+            document_id: "test_doc",
+            original_length: 75,
+            deidentified_text: "[PERSON_ABC123] โทรศัพท์ [PHONE_DEF456] อีเมล [EMAIL_GHI789] [PERSON_JKL012] ให้ยา",
+            entities_detected: 4,
+            transformations_applied: 4
+        }]
+    };
+    
+    console.log('Calling displayDeidentificationResults with mock data...');
+    displayDeidentificationResults(mockResponse);
 }
 
 // Expose functions globally for HTML onclick handlers
