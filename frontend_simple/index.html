@@ -19,7 +19,11 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .textarea-container {
-            min-height: 300px;
+            min-height: 900px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
         }
         .entity-badge {
             margin: 2px;
@@ -152,7 +156,7 @@
 
                         <div class="mb-3">
                             <label for="inputText" class="form-label">Clinical Text</label>
-                            <textarea class="form-control textarea-container" id="inputText" 
+                            <textarea class="form-control textarea-container" id="inputText" rows="30"
                                       placeholder="Enter your clinical text here for de-identification...&#10;&#10;The system supports:&#10;• Thai clinical notes (เช่น ชื่อผู้ป่วย หมอ โทรศัพท์)&#10;• English clinical notes (Names, phones, emails, dates)&#10;• Mixed Thai-English content&#10;• Phone numbers, email addresses, dates&#10;• Medical staff names and patient information"></textarea>
                         </div>
 
@@ -191,7 +195,7 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label for="outputText" class="form-label">Processed Text</label>
-                            <textarea class="form-control textarea-container" id="outputText" 
+                            <textarea class="form-control textarea-container" id="outputText" rows="30"
                                       readonly placeholder="Processed text will appear here...&#10;&#10;• Entity Detection: Shows detected sensitive information&#10;• De-Identification: Shows masked/pseudonymized text&#10;• All personal information will be protected"></textarea>
                         </div>
 

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expanded Text Areas Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container { margin-top: 20px; }
+        .textarea-container {
+            min-height: 900px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+        .comparison-section { margin: 20px 0; }
+        .old-size { min-height: 300px; }
+        .new-size { min-height: 900px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📏 Text Area Size Comparison</h1>
+        <p class="text-muted">Demonstration of the expanded text areas (3x larger than original)</p>
+        
+        <!-- Original Size vs New Size Comparison -->
+        <div class="comparison-section">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">
+                            <h5>📐 Original Size (300px)</h5>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control old-size" placeholder="This was the original textarea size...&#10;&#10;Height: 300px&#10;&#10;Users requested 3x larger text areas for better usability when working with longer clinical texts and detailed de-identification results."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5>📏 New Expanded Size (900px)</h5>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control new-size" placeholder="This is the new expanded textarea size!&#10;&#10;Height: 900px (3x larger)&#10;&#10;Much better for:&#10;• Long clinical texts&#10;• Detailed de-identification results&#10;• Better readability&#10;• Improved user experience&#10;• Easier text editing and review&#10;• Side-by-side comparison of original vs de-identified text&#10;&#10;Features added:&#10;• Monospace font for better alignment&#10;• Improved line height (1.5)&#10;• Vertical resize capability&#10;• Better font size (14px)&#10;&#10;Perfect for clinical documentation workflow!"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Application Preview -->
+        <div class="comparison-section">
+            <h2>🏥 Main Application with Expanded Text Areas</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5><i class="fas fa-edit"></i> Clinical Text Input (Expanded)</h5>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control textarea-container" rows="30" placeholder="Enter your clinical text here for de-identification...
+
+The system supports:
+• Thai clinical notes (เช่น ชื่อผู้ป่วย หมอ โทรศัพท์)
+• English clinical notes (Names, phones, emails, dates)  
+• Mixed Thai-English content
+• Phone numbers, email addresses, dates
+• Medical staff names and patient information
+
+Example long clinical text:
+คุณสมชาย วิทยาภูมิ เพศชาย อายุ 45 ปี
+โทรศัพท์ 089-123-4567 
+อีเมล somchai@hospital.co.th
+ที่อยู่ 123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองเตย กรุงเทพฯ 10110
+
+ประวัติการรักษา:
+วันที่ 15 มกราคม 2567
+หมอสมชาย จันทร์เจริญ แพทย์ประจำแผนกอายุรกรรม
+ตรวจพบอาการไข้สูง ปวดหัว คลื่นไส้ 
+วินิจฉัยเบื้องต้น: ไข้หวัดใหญ่
+สั่งยา: Paracetamol 500mg ทุก 6 ชั่วโมง
+         Ibuprofen 400mg เมื่อมีอาการปวด
+
+การนัดหมายครั้งถัดไป:
+วันที่ 22 มกราคม 2567 เวลา 09:00 น.
+หมอ Peter Wilson แผนกอายุรกรรม
+โทรศัพท์ติดต่อ 02-123-4567 ต่อ 1234
+
+หมายเหตุ: ผู้ป่วยมีประวัติแพ้ยา Penicillin
+ติดต่อฉุกเฉิน: คุณสมใส วิทยาภูมิ (ภรรยา) 
+โทรศัพท์ 081-987-6543">คุณสมชาย วิทยาภูมิ เพศชาย อายุ 45 ปี
+โทรศัพท์ 089-123-4567 
+อีเมล somchai@hospital.co.th
+ที่อยู่ 123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองเตย กรุงเทพฯ 10110
+
+ประวัติการรักษา:
+วันที่ 15 มกราคม 2567
+หมอสมชาย จันทร์เจริญ แพทย์ประจำแผนกอายุรกรรม
+ตรวจพบอาการไข้สูง ปวดหัว คลื่นไส้ 
+วินิจฉัยเบื้องต้น: ไข้หวัดใหญ่
+สั่งยา: Paracetamol 500mg ทุก 6 ชั่วโมง
+         Ibuprofen 400mg เมื่อมีอาการปวด
+
+การนัดหมายครั้งถัดไป:
+วันที่ 22 มกราคม 2567 เวลา 09:00 น.
+หมอ Peter Wilson แผนกอายุรกรรม
+โทรศัพท์ติดต่อ 02-123-4567 ต่อ 1234
+
+หมายเหตุ: ผู้ป่วยมีประวัติแพ้ยา Penicillin
+ติดต่อฉุกเฉิน: คุณสมใส วิทยาภูมิ (ภรรยา) 
+โทรศัพท์ 081-987-6543</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="fas fa-eye"></i> Processed Text Output (Expanded)</h5>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control textarea-container" rows="30" readonly>DE-IDENTIFICATION RESULTS
+========================================
+
+JOB ID: demo_job_20251002_014825
+STATUS: completed
+ENTITIES DETECTED: 12
+TRANSFORMATIONS: 12
+
+ORIGINAL TEXT:
+คุณสมชาย วิทยาภูมิ เพศชาย อายุ 45 ปี
+โทรศัพท์ 089-123-4567 
+อีเมล somchai@hospital.co.th
+ที่อยู่ 123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองเตย กรุงเทพฯ 10110
+
+ประวัติการรักษา:
+วันที่ 15 มกราคม 2567
+หมอสมชาย จันทร์เจริญ แพทย์ประจำแผนกอายุรกรรม
+ตรวจพบอาการไข้สูง ปวดหัว คลื่นไส้ 
+วินิจฉัยเบื้องต้น: ไข้หวัดใหญ่
+สั่งยา: Paracetamol 500mg ทุก 6 ชั่วโมง
+         Ibuprofen 400mg เมื่อมีอาการปวด
+
+การนัดหมายครั้งถัดไป:
+วันที่ 22 มกราคม 2567 เวลา 09:00 น.
+หมอ Peter Wilson แผนกอายุรกรรม
+โทรศัพท์ติดต่อ 02-123-4567 ต่อ 1234
+
+หมายเหตุ: ผู้ป่วยมีประวัติแพ้ยา Penicillin
+ติดต่อฉุกเฉิน: คุณสมใส วิทยาภูมิ (ภรรยา) 
+โทรศัพท์ 081-987-6543
+
+DE-IDENTIFIED TEXT:
+[PERSON_A1B2C3] เพศชาย อายุ 45 ปี
+โทรศัพท์ [PHONE_D4E5F6]
+อีเมล [EMAIL_G7H8I9]
+ที่อยู่ [ADDRESS_J0K1L2] ถนนสุขุมวิท แขวงคลองตัน เขตคลองเตย กรุงเทพฯ [POSTAL_M3N4O5]
+
+ประวัติการรักษา:
+วันที่ [DATE_P6Q7R8]
+[PERSON_S9T0U1] แพทย์ประจำแผนกอายุรกรรม
+ตรวจพบอาการไข้สูง ปวดหัว คลื่นไส้ 
+วินิจฉัยเบื้องต้น: ไข้หวัดใหญ่
+สั่งยา: Paracetamol 500mg ทุก 6 ชั่วโมง
+         Ibuprofen 400mg เมื่อมีอาการปวด
+
+การนัดหมายครั้งถัดไป:
+วันที่ [DATE_V2W3X4] เวลา [TIME_Y5Z6A7] น.
+[PERSON_B8C9D0] แผนกอายุรกรรม
+โทรศัพท์ติดต่อ [PHONE_E1F2G3] ต่อ [EXT_H4I5J6]
+
+หมายเหตุ: ผู้ป่วยมีประวัติแพ้ยา Penicillin
+ติดต่อฉุกเฉิน: [PERSON_K7L8M9] (ภรรยา) 
+โทรศัพท์ [PHONE_N0O1P2]
+
+========================================
+Privacy protection applied successfully!
+
+✅ All personal identifiers have been masked:
+   • Patient names and contacts
+   • Medical staff names  
+   • Phone numbers and emails
+   • Addresses and postal codes
+   • Dates and appointment times
+   • Emergency contacts
+
+🛡️ PDPA/HIPAA Compliance Achieved
+Clinical context preserved while protecting privacy.</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-success mt-4">
+            <h4>✅ Text Area Expansion Complete!</h4>
+            <p><strong>Changes Made:</strong></p>
+            <ul>
+                <li>📏 <strong>Height increased from 300px to 900px</strong> (3x larger)</li>
+                <li>📝 <strong>Added rows="30"</strong> for consistent sizing</li>  
+                <li>🔤 <strong>Monospace font</strong> for better text alignment</li>
+                <li>📐 <strong>Improved line height (1.5)</strong> for readability</li>
+                <li>↕️ <strong>Vertical resize capability</strong> for user customization</li>
+                <li>📖 <strong>Better font size (14px)</strong> for comfortable reading</li>
+            </ul>
+            
+            <p><strong>Benefits:</strong></p>
+            <ul>
+                <li>🏥 <strong>Better for long clinical texts</strong></li>
+                <li>👀 <strong>Easier to review de-identification results</strong></li>
+                <li>⚖️ <strong>Side-by-side comparison</strong> of original vs masked text</li>
+                <li>✏️ <strong>More comfortable editing experience</strong></li>
+                <li>🔍 <strong>Reduced scrolling</strong> for better workflow</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
